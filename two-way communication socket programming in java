@@ -1,0 +1,62 @@
+#Client Side 
+
+
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Scanner;
+public class client {
+    public static void main(String[] args) throws IOException {
+        Socket s= new Socket("127.0.0.1", 5365);
+        System.out.println("Access Granted");
+        DataOutputStream out = new DataOutputStream(s.getOutputStream());
+        DataInputStream input = new DataInputStream(s.getInputStream());
+        Scanner scn = new Scanner(System.in);
+        String str = "";
+        String str1 = "";
+        while (!str.equals("Bye")) {
+            str =  scn.nextLine();
+            out.writeUTF(str);
+            str1 = input.readUTF();
+            System.out.println("Server Says: "+ str1);
+        }
+        out.close();
+        s.close();
+
+    }
+}
+
+
+#Server
+
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Scanner;
+public class Server {
+    public static void main(String[] args) throws IOException {
+        ServerSocket ss = new ServerSocket(5365);
+        System.out.println("Waiting for Access");
+        Socket s = ss.accept();
+        System.out.println("Access Granted");
+        DataInputStream input = new DataInputStream(s.getInputStream());
+        DataOutputStream out = new DataOutputStream(s.getOutputStream());
+        Scanner scn = new Scanner(System.in);
+        String str1 = "";
+        String str = "";
+        while (!str.equals("Bye")){
+            str = input.readUTF();
+            System.out.println("Clients Says: "+ str);
+            str1 =  scn.nextLine();
+            out.writeUTF(str1);
+        }
+        input.close();
+        s.close();
+        ss.close();
+    }
+}
