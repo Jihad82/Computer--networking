@@ -1,0 +1,134 @@
+#Client-side:
+
+package lab.report.pkg4;
+import java.io.DataInputStream; import
+java.io.DataOutputStream; import
+java.net.Socket; import java.util.Scanner;
+public class Client {
+public static void main(String[] args) { try {
+Socket s = new Socket("localhost", 5555);
+System.out.println("Client is connected at server's handshaking port number: " +
+s.getPort());
+System.out.println("Client's port number is: " + s.getLocalPort());
+System.out.println("Connected....");
+DataInputStream input = new DataInputStream(s.getInputStream());
+DataOutputStream output = new DataOutputStream(s.getOutputStream());
+Scanner scan = new Scanner(System.in);
+String Outputstr = ""; while (true) {
+System.out.println("Enter the first number: ");
+Outputstr = scan.nextLine(); if
+(Outputstr.equals("ENDS")) {
+output.writeUTF(Outputstr); break;
+} else { output.writeUTF(Outputstr);
+}
+System.out.println("Enter the second number: ");
+Outputstr = scan.nextLine();
+if (Outputstr.equals("ENDS")) {
+output.writeUTF(Outputstr);
+break;
+} else {
+output.writeUTF(Outputstr);
+}
+System.out.println("Enter the mathematical operation(sum, sub, mul, div, mod): ");
+Outputstr = scan.nextLine(); if
+(Outputstr.equals("ENDS")) {
+output.writeUTF(Outputstr);
+break;
+} else {
+output.writeUTF(Outputstr);
+}
+System.out.println("Server says: " + input.readUTF());
+}
+output.close();
+s.close();
+scan.close();
+} catch (Exception e) {
+System.out.println(e);
+}
+}
+}
+
+#Server-side:
+
+package lab.report.pkg4;
+import java.io.DataInputStream; import
+java.io.DataOutputStream; import
+java.io.IOException; import java.net.ServerSocket;
+import java.net.Socket; public class Server { public
+static class ClientThread extends Thread {
+Socket client;
+int clientnum;
+ClientThread(int clientnum, Socket client) {
+this.clientnum = clientnum;
+this.client = client;
+}
+
+@Override
+public void run() {
+try {
+System.out.println("Client " + clientnum + " Request is accepted at port number: " +
+client.getPort());
+System.out.println("Server's Communication port " + client.getLocalPort());
+DataInputStream input = new DataInputStream(client.getInputStream());
+DataOutputStream output = new DataOutputStream(client.getOutputStream());
+String Inputstr = "";
+while (true) {
+Inputstr = input.readUTF(); if
+(Inputstr.equals("ENDS")) {
+output.writeUTF("ENDS");
+break;
+}
+int a =
+Integer.parseInt(Inputstr);
+Inputstr = input.readUTF(); if
+(Inputstr.equals("ENDS")) {
+output.writeUTF("ENDS");
+break;
+}
+int b =
+Integer.parseInt(Inputstr); String
+op = input.readUTF(); if
+(op.equals("ENDS")) {
+output.writeUTF("ENDS");
+break;
+}
+if (op.equals("sum")) { output.writeUTF(a +
+"+" + b + "=" + (a + b));
+} else if (op.equals("sub")) { output.writeUTF(a
++ "-" + b + "=" + +(a - b));
+} else if (op.equals("mul")) { output.writeUTF(a
++ "*" + b + "=" + +(a * b));
+} else if (op.equals("div")) {
+output.writeUTF(a + "/" + b + "=" + (a / b));
+} else if (op.equals("mod")) { output.writeUTF(a
++ "%" + b + "=" + (a % b));
+} else { output.writeUTF("Invalid
+Operation"); }
+}
+client.close();
+input.close();
+output.close();
+} catch (Exception e) {
+System.out.println(e);
+}
+System.out.println("Client " + clientnum + " disconnect from the server!!");
+}
+}
+
+public static void main(String[] args) throws IOException {
+ServerSocket ss = new ServerSocket(5555);
+System.out.println("Server is connected at port no: " + ss.getLocalPort());
+System.out.println("Server is Connecting");
+System.out.println("Server is waiting for
+client"); int count = 1; while (count < 6) { try {
+Socket s = ss.accept();
+new ClientThread(count, s).start();
+} catch (Exception e) {
+System.out.println(e);
+}
+count++;
+}
+ss.close();
+System.out.println("Connection Automatically Closed!!");
+}
+}
